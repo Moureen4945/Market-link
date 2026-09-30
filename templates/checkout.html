@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Checkout</h1>
+<div class="card">
+    <h3>{{ product.name }}</h3>
+    <p>{{ product.description }}</p>
+    <p class="price">KES {{ "%.2f"|format(product.price) }} each</p>
+</div>
+
+{% if stk_result %}
+    <div class="success">
+        <p>Payment prompt sent to your phone. Enter your M-Pesa PIN to complete the purchase for order #{{ order_id }} (KES {{ "%.2f"|format(order_total) }}).</p>
+        <p class="muted">Refresh your orders page in a minute to see it marked as paid.</p>
+    </div>
+{% else %}
+    <form method="post">
+        <label>Quantity
+            <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" required>
+        </label>
+        <label>M-Pesa phone number
+            <input type="text" name="phone" placeholder="2547XXXXXXXX" pattern="2547[0-9]{8}" required>
+        </label>
+        <label>Broker ID (optional, if someone referred you)
+            <input type="number" name="broker_id" placeholder="e.g. 12">
+        </label>
+        <button type="submit" class="btn">Pay with M-Pesa</button>
+    </form>
+{% endif %}
+{% endblock %}

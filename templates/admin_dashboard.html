@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Admin Control Center</h1>
+
+<div class="stat-row">
+    <div class="stat"><span>KES {{ "%.2f"|format(totals.gross_sales) }}</span>Gross sales (all M-Pesa payments received)</div>
+    <div class="stat"><span>KES {{ "%.2f"|format(totals.platform_revenue) }}</span>Platform revenue (your cut)</div>
+    <div class="stat"><span>KES {{ "%.2f"|format(totals.broker_commissions) }}</span>Broker commissions owed</div>
+    <div class="stat"><span>{{ totals.paid_orders }}</span>Paid orders</div>
+</div>
+
+<section>
+    <h2>Platform settings</h2>
+    <form method="post">
+        <input type="hidden" name="update_settings" value="1">
+        <label>Platform fee % (admin's cut of every sale)
+            <input type="number" step="0.01" name="platform_fee_pct" value="{{ settings.platform_fee_pct }}">
+        </label>
+        <label>Default broker commission %
+            <input type="number" step="0.01" name="default_broker_commission_pct" value="{{ settings.default_broker_commission_pct }}">
+        </label>
+        <p class="hint">M-Pesa shortcode receiving all payments: <strong>{{ settings.mpesa_shortcode }}</strong> (set in .env)</p>
+        <button type="submit" class="btn">Save settings</button>
+    </form>
+</section>
+
+<section>
+    <h2>Pending seller (company) approvals</h2>
+    <table>
+        <tr><th>Company</th><th>Contact</th><th>Email</th><th></th></tr>
+        {% for s in pending_sellers %}
+        <tr>
+            <td>{{ s.company_name }}</td><td>{{ s.full_name }}</td><td>{{ s.email }}</td>
+            <td>
+                <form method="post"><input type="hidden" name="user_id" value="{{ s.id }}">
+                <button type="submit" name="approve_seller" class="btn btn-sm">Approve</button></form>
+            </td>
+        </tr>
+        {% else %}<tr><td colspan="4">None pending.</td></tr>{% endfor %}
+    </table>
+</section>
+
+<section>
+    <h2>Pending broker approvals</h2>
+    <table>
+        <tr><th>Name</th><th>Email</th><th>Commission %</th><th></th></tr>
+        {% for b in pending_brokers %}
+        <tr>
+            <td>{{ b.full_name }}</td><td>{{ b.email }}</td><td>{{ b.commission_rate }}%</td>
+            <td>
+                <form method="post"><input type="hidden" name="user_id" value="{{ b.id }}">
+                <button type="submit" name="approve_broker" class="btn btn-sm">Approve</button></form>
+            </td>
+        </tr>
+        {% else %}<tr><td colspan="4">None pending.</td></tr>{% endfor %}
+    </table>
+</section>
+
+<section>
+    <h2>All brokers — commission rates</h2>
+    <table>
+        <tr><th>Name</th><th>Rate</th><th>Approved</th><th>Update rate</th></tr>
+        {% for b in all_brokers %}
+        <tr>
+            <td>{{ b.full_name }}</td><td>{{ b.commission_rate }}%</td>
+            <td>{{ "Yes" if b.approved else "No" }}</td>
+            <td>
+                <form method="post" class="inline-form">
+                    <input type="hidden" name="user_id" value="{{ b.id }}">
+                    <input type="number" step="0.01" name="rate" value="{{ b.commission_rate }}" style="width:80px">
+                    <button type="submit" name="set_commission" class="btn btn-sm">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<section>
+    <h2>M-Pesa transactions (money lands here first — your shortcode)</h2>
+    <table>
+        <tr><th>Order</th><th>Phone</th><th>Amount</th><th>Receipt</th><th>Status</th><th>Date</th></tr>
+        {% for t in transactions %}
+        <tr>
+            <td>#{{ t.order_id }}</td><td>{{ t.phone }}</td>
+            <td>KES {{ "%.2f"|format(t.amount) }}</td>
+            <td>{{ t.mpesa_receipt or "—" }}</td>
+            <td><span class="badge badge-{{ t.status }}">{{ t.status }}</span></td>
+            <td>{{ t.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<section>
+    <h2>Pending payouts (to brokers & sellers)</h2>
+    <table>
+        <tr><th>Recipient</th><th>Role</th><th>Order</th><th>Amount</th><th></th></tr>
+        {% for p in pending_payouts %}
+        <tr>
+            <td>{{ p.full_name }}</td><td>{{ p.role }}</td><td>#{{ p.order_id }}</td>
+            <td>KES {{ "%.2f"|format(p.amount) }}</td>
+            <td>
+                <form method="post"><input type="hidden" name="payout_id" value="{{ p.id }}">
+                <button type="submit" name="mark_paid" class="btn btn-sm">Mark paid</button></form>
+            </td>
+        </tr>
+        {% else %}<tr><td colspan="5">Nothing pending.</td></tr>{% endfor %}
+    </table>
+</section>
+{% endblock %}

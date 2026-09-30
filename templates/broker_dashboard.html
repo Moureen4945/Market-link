@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome, {{ user.full_name }} (Broker)</h1>
+
+{% if not profile.approved %}
+    <p class="error">Your account is pending admin approval. You can browse but cannot earn commission until approved.</p>
+{% endif %}
+
+<div class="stat-row">
+    <div class="stat"><span>{{ profile.commission_rate }}%</span>Your commission rate</div>
+    <div class="stat"><span>KES {{ "%.2f"|format(total_earned) }}</span>Total commission earned</div>
+    <div class="stat"><span>Broker ID: {{ user.id }}</span>Give this to customers you refer</div>
+</div>
+
+<section>
+    <h2>Link a buyer to a seller</h2>
+    <form method="post">
+        <input type="hidden" name="create_link" value="1">
+        <label>Customer
+            <select name="customer_id" required>
+                {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.full_name }} ({{ c.email }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Seller / Company
+            <select name="seller_id" required>
+                {% for s in sellers %}
+                <option value="{{ s.id }}">{{ s.company_name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Note<input type="text" name="note" placeholder="e.g. Interested in bulk maize order"></label>
+        <button type="submit" class="btn">Create link</button>
+    </form>
+</section>
+
+<section>
+    <h2>My links</h2>
+    <table>
+        <tr><th>Customer</th><th>Seller</th><th>Note</th><th>Date</th></tr>
+        {% for l in links %}
+        <tr>
+            <td>{{ l.customer_name }}</td><td>{{ l.company_name }}</td>
+            <td>{{ l.note }}</td><td>{{ l.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<section>
+    <h2>Orders & commission</h2>
+    <table>
+        <tr><th>Order #</th><th>Customer</th><th>Seller</th><th>Total</th><th>Commission</th><th>Status</th></tr>
+        {% for o in orders %}
+        <tr>
+            <td>#{{ o.id }}</td><td>{{ o.customer_name }}</td><td>{{ o.company_name }}</td>
+            <td>KES {{ "%.2f"|format(o.total_amount) }}</td>
+            <td>KES {{ "%.2f"|format(o.commission_amount) }}</td>
+            <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+{% endblock %}

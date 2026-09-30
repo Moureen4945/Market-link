@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-box">
+    <h2>Create an account</h2>
+    <form method="post">
+        <label>Full name<input type="text" name="full_name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Phone (2547XXXXXXXX)
+            <input type="text" name="phone" pattern="2547[0-9]{8}" placeholder="254712345678" required>
+        </label>
+        <label>Password<input type="password" name="password" required minlength="6"></label>
+        <label>I am a...
+            <select name="role">
+                <option value="customer">Customer (buying goods)</option>
+                <option value="broker">Broker / Manager (link buyers & sellers)</option>
+                <option value="seller">Company / Seller</option>
+            </select>
+        </label>
+        <p class="hint">Broker and Seller accounts require admin approval before they can trade.</p>
+        <button type="submit" class="btn">Register</button>
+    </form>
+    <p><a href="{{ url_for('login') }}">Already have an account? Log in</a></p>
+</div>
+{% endblock %}

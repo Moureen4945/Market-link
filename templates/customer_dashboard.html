@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome, {{ user.full_name }}</h1>
+
+<section>
+    <h2>Available products</h2>
+    <div class="grid">
+    {% for p in products %}
+        <div class="card">
+            <h3>{{ p.name }}</h3>
+            <p class="muted">{{ p.company_name }}</p>
+            <p>{{ p.description }}</p>
+            <p class="price">KES {{ "%.2f"|format(p.price) }}</p>
+            <a class="btn" href="{{ url_for('checkout', product_id=p.id) }}">Buy now</a>
+        </div>
+    {% else %}
+        <p>No products available right now.</p>
+    {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h2>My orders</h2>
+    <table>
+        <tr><th>Order #</th><th>Seller</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+        {% for o in orders %}
+        <tr>
+            <td>#{{ o.id }}</td>
+            <td>{{ o.company_name }}</td>
+            <td>KES {{ "%.2f"|format(o.total_amount) }}</td>
+            <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+            <td>{{ o.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+{% endblock %}

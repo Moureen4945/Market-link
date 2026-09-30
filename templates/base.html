@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ app_name }}{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if session.get('user') %}
+<nav class="navbar">
+    <span class="brand">{{ app_name }}</span>
+    <span class="nav-user">{{ session['user']['full_name'] }} · {{ session['user']['role']|capitalize }}</span>
+    <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline">Log out</a>
+</nav>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, msg in messages %}
+    <p class="{{ 'error' if category == 'error' else 'success' }}">{{ msg }}</p>
+  {% endfor %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+</body>
+</html>
