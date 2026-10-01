@@ -44,3 +44,27 @@ def execute(sql, params=None, returning=None):
         result = cur.fetchone() if returning else None
     conn.commit()
     return result[returning] if result else None
+import os
+import psycopg2
+from flask import g
+
+def get_db():
+    if 'db' not in g:
+        # 1. Try DATABASE_URL first (Render's internal connection string)
+        db_url = os.environ.get('DATABASE_URL')
+        
+        if db_url:
+            # Fix for SQLAlchemy/psycopg2 URL format if it starts with postgres://
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            g.db = psycopg2.connect(db_url)
+        else:
+            # 2. Fall back to individual variables
+            g.db = psycopg2.connect(
+                host=os.environ.get('DB_HOST'),
+                database=os.environ.get('DB_NAME'),
+                user=os.environ.get('DB_USER'),
+                password=os.environ.get('DB_PASSWORD'),
+                port=os.environ.get('DB_PORT', '5432')
+            )
+    return g.db
